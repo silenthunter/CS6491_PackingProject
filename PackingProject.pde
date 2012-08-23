@@ -74,15 +74,25 @@ void drawBounds()
   float centerX = leftB + (rightB - leftB) / 2;
   float centerY = bottomB + (topB - bottomB) / 2;
   
-  //find the farthest point from the center
-  float radius = 0;
+  float greatestDist = 0;
+  point D1 = null, D2 = null;
   for(int i = 0; i < circles.length; i++)
-  {
-    float distance = abs(dist(centerX, centerY, 
-      circles[i].X, circles[i].Y)) + circles[i].R;
-    if(distance > radius)
-      radius = distance;
-  }
+    for(int j = 0; j < circles.length; j++)
+    {
+      float distance = abs(dist(circles[i].X, circles[i].Y,
+        circles[j].X, circles[j].Y)) + circles[i].R + circles[j].R;
+        
+      if(distance > greatestDist)
+      {
+        D1 = circles[i];
+        D2 = circles[j];
+        greatestDist = distance;
+      }
+    }
+   
+  centerX = (D1.X + D2.X) / 2;
+  centerY = (D1.Y + D2.Y) / 2;
+  float radius = greatestDist / 2;  
   
   stroke(0);
   fill(0, 0, 0, 0);
