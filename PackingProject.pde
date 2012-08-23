@@ -9,6 +9,7 @@ public class point
 
 point[] circles = new point[5];
 point chosen = null;
+boolean rMouse = false;
 
 void setup()
 {
@@ -41,6 +42,51 @@ void draw()
   
   for(int i = 0; i < circles.length; i++)
     ellipse(circles[i].X, circles[i].Y, circles[i].R * 2, circles[i].R * 2);
+    
+  if(rMouse)
+    drawBounds();
+}
+
+void drawBounds()
+{
+  println("test");
+      
+  float leftB = width, rightB = 0,
+  topB = 0, bottomB = height;
+  
+  for(int i = 0; i < circles.length; i++)
+  {
+    if(circles[i].X - circles[i].R < leftB)
+      leftB = circles[i].X - circles[i].R;
+    if(circles[i].X + circles[i].R > rightB)
+      rightB = circles[i].X + circles[i].R;
+    if(circles[i].Y - circles[i].R < bottomB)
+      bottomB = circles[i].Y - circles[i].R;
+    if(circles[i].Y + circles[i].R > topB)
+      topB = circles[i].Y + circles[i].R;;
+  }
+  
+  line(0, topB, width, topB);
+  line(0, bottomB, width, bottomB);
+  line(leftB, 0, leftB, height);
+  line(rightB, 0, rightB, height);
+  
+  float centerX = leftB + (rightB - leftB) / 2;
+  float centerY = bottomB + (topB - bottomB) / 2;
+  
+  //find the farthest point from the center
+  float radius = 0;
+  for(int i = 0; i < circles.length; i++)
+  {
+    float distance = abs(dist(centerX, centerY, 
+      circles[i].X, circles[i].Y)) + circles[i].R;
+    if(distance > radius)
+      radius = distance;
+  }
+  
+  stroke(0);
+  fill(0, 0, 0, 0);
+  ellipse(centerX, centerY, radius * 2, radius * 2);
 }
 
 void mouseDragged()
@@ -54,14 +100,23 @@ void mouseDragged()
 
 void mousePressed()
 {    
-  chosen = null;
-  for(int i = 0; i < circles.length; i++)
+  //rMouse = false;
+  
+  if(mouseButton == LEFT)
   {
-    if(dist(mouseX, mouseY, circles[i].X, circles[i].Y) < circles[i].R)
+    chosen = null;
+    for(int i = 0; i < circles.length; i++)
     {
-      chosen = circles[i];
-      break;
+      if(dist(mouseX, mouseY, circles[i].X, circles[i].Y) < circles[i].R)
+      {
+        chosen = circles[i];
+        break;
+      }
     }
+  }
+  else
+  {
+    rMouse = true;
   }
 }
 
