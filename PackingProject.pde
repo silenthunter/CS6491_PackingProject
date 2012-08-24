@@ -10,6 +10,7 @@ public class point
 point[] circles = new point[5];
 point chosen = null;
 boolean rMouse = false;
+Circle smallest = null;
 
 void setup()
 {
@@ -43,13 +44,17 @@ void draw()
   for(int i = 0; i < circles.length; i++)
     ellipse(circles[i].X, circles[i].Y, circles[i].R * 2, circles[i].R * 2);
     
-  if(rMouse)
-    drawBounds();
+  //if(rMouse)
+  //  drawBounds();
+    
+  fill(128, 128, 128, 100);
+  if(smallest != null)
+    ellipse((float)smallest.getX(), (float)smallest.getY(), (float)smallest.radius * 2, (float)smallest.radius * 2);
 }
 
 void drawBounds()
 {
-  println("test");
+//  println("test");
       
   float leftB = width, rightB = 0,
   topB = 0, bottomB = height;
@@ -133,4 +138,46 @@ void mousePressed()
 void mouseReleased()
 {
   chosen = null;
+  if(mouseButton == LEFT) return;
+  
+  for(int i = 0; i < circles.length; i++)
+  for(int j = 0; j < circles.length; j++)
+  for(int k = 0; k < circles.length; k++)
+  {
+  if(i == j || j == k || i == k) continue;
+//  println("" + i + ", " + j + ", " + k);
+  Circle c1 = new Circle(circles[i].X, circles[i].Y, circles[i].R);
+  Circle c2 = new Circle(circles[j].X, circles[j].Y, circles[j].R);
+  Circle c3 = new Circle(circles[k].X, circles[k].Y, circles[k].R);
+  
+  try
+  {
+    Shape[] solutions = Apollonius.solutionForShapes(c1, c2, c3);
+  
+    for (Shape shape : solutions) {
+      if (shape != null) {
+          // whatever you do with the solutions, always check for this
+          
+          if(shape.getShapeType() != ShapeType.CIRCLE) continue;
+          
+          Circle res = (Circle)shape;
+          boolean allIn = true;
+          for(int l = 0; l < circles.length; l++)
+          {
+            float distance = abs(dist((float)res.getX(), (float)res.getY(), circles[l].X, circles[l].Y)) + circles[l].R;
+            if(distance > res.radius + 5)
+              allIn = false;
+          }
+          
+          if(allIn && res.getX() > 0)
+          {
+            println("yay");
+            smallest = res;
+            println(smallest.getX() + ", " + smallest.getY() + ", " + smallest.radius);
+          }
+      }
+    }
+  }catch(ArrayIndexOutOfBoundsException e){continue;}
+  }
 }
+
