@@ -19,6 +19,11 @@ boolean drawPlayer2 = false;
 
 //Intialization
 void setup(){
+  curDisk=-1;
+  overIndex=-1;
+  smallestPlayer1 = null;
+  smallestPlayer2 = null;
+  
   size(800,600);
   centerX=width/2; centerY=height/2;
   float y=0;
@@ -158,7 +163,6 @@ void DrawMinimalBounds()
                 {
                   if(currentDisks == diskSet1)smallestPlayer1 = res;
                   if(currentDisks == diskSet2)smallestPlayer2 = res;
-                  println(smallestPlayer1.getX() + ", " + smallestPlayer1.getY() + ", " + smallestPlayer1.radius);
                 }
             }
           }
@@ -172,6 +176,13 @@ void keyPressed()
   {
     drawPlayer2 = true;
     currentDisks = diskSet2;
+  }
+  else if(key == '1')
+  {
+    drawPlayer2 = false;
+    diskSet1 = new Disks();
+    currentDisks = diskSet1;
+    setup();
   }
 }
 
