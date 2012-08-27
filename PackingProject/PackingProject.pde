@@ -13,7 +13,8 @@ Disks diskSet2;
 Disks currentDisks = diskSet1;
 int curDisk=-1;
 int overIndex=-1;
-Circle smallest = null;
+Circle smallestPlayer1 = null;
+Circle smallestPlayer2 = null;
 boolean drawPlayer2 = false;
 
 //Intialization
@@ -54,10 +55,15 @@ void draw(){
   if(drawPlayer2)
     diskSet2.show();
   
-  if(smallest != null)
+  if(smallestPlayer1 != null)
   {
     fill(100, 100);
-    ellipse((float)smallest.getX(), (float)smallest.getY(), (float)smallest.radius * 2, (float)smallest.radius * 2);
+    ellipse((float)smallestPlayer1.getX(), (float)smallestPlayer1.getY(), (float)smallestPlayer1.radius * 2, (float)smallestPlayer1.radius * 2);
+  }
+  if(smallestPlayer2 != null)
+  {
+    fill(100, 100);
+    ellipse((float)smallestPlayer2.getX(), (float)smallestPlayer2.getY(), (float)smallestPlayer2.radius * 2, (float)smallestPlayer2.radius * 2);
   }
 }
 
@@ -112,7 +118,10 @@ boolean overlap2(){
 
 void DrawMinimalBounds()
 {
-  smallest = null;
+  if(currentDisks == diskSet1) smallestPlayer1 = null;
+  if(currentDisks == diskSet2) smallestPlayer2 = null;
+  
+  //Get all triplets and run the Apollonius solver on them
   for(int i = 0; i < currentDisks.n; i++)
     for(int j = 0; j < currentDisks.n; j++)
       for(int k = 0; k < currentDisks.n; k++)
@@ -135,6 +144,7 @@ void DrawMinimalBounds()
                 
                 Circle res = (Circle)shape;
                 boolean allIn = true;
+                //See if all the discs are within this circle
                 for(int l = 0; l < currentDisks.n; l++)
                 {
                   float distance = abs(dist((float)res.getX(), (float)res.getY(), currentDisks.disks[l].x, currentDisks.disks[l].y)) + currentDisks.disks[l].r;
@@ -142,11 +152,13 @@ void DrawMinimalBounds()
                     allIn = false;
                 }
                 
-                if(allIn && res.getX() > 0 && (smallest == null || res.radius <= smallest.radius))
+                //Update to a new circle only if it has a smaller radius
+                Circle currentMin = currentDisks == diskSet1 ? smallestPlayer1 : smallestPlayer2;
+                if(allIn && res.getX() > 0 && (currentMin == null || res.radius <= currentMin.radius))
                 {
-                  println("yay");
-                  smallest = res;
-                  println(smallest.getX() + ", " + smallest.getY() + ", " + smallest.radius);
+                  if(currentDisks == diskSet1)smallestPlayer1 = res;
+                  if(currentDisks == diskSet2)smallestPlayer2 = res;
+                  println(smallestPlayer1.getX() + ", " + smallestPlayer1.getY() + ", " + smallestPlayer1.radius);
                 }
             }
           }
