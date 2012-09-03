@@ -80,7 +80,11 @@ void mousePressed(){
   
   if(mouseButton == RIGHT)
   {
+   
     DrawMinimalBounds();
+     println((float)smallestPlayer1.getX());
+    println((float)smallestPlayer1.getY());
+    println((float)smallestPlayer1.radius);
   }
 }
 
@@ -148,12 +152,51 @@ void DrawMinimalBounds()
                 if(shape.getShapeType() != ShapeType.CIRCLE) continue;
                 
                 Circle res = (Circle)shape;
+                
+                //special cases
+                float x1, x2, x3, y1, y2, y3, r1, r2, r3;
+                x1=(float)c1.getX(); x2=(float)c2.getX(); x3=(float)c3.getX();
+                y1=(float)c1.getY(); y2=(float)c2.getY(); y3=(float)c3.getY();
+                r1=(float)c1.radius; r2=(float)c2.radius; r3=(float)c3.radius;
+                float dist12=abs(dist(x1,y1,x2,y2));
+                float dist13=abs(dist(x1,y1,x3,y3));
+                float dist23=abs(dist(x2,y2,x3,y3));
+                float distSP;
+                float tmpX,tmpY,tmpR;
+                if(dist12>=dist13&&dist12>=dist23){
+                  tmpR=(dist12+r1+r2)/2;
+                  tmpX=x1+(tmpR-r1)*(x2-x1)/dist12;
+                  tmpY=y1+(tmpR-r1)*(y2-y1)/dist12;
+                  distSP=abs(dist(tmpX,tmpY,x3,y3));
+                  if(distSP<(tmpR-r3)){
+                    res=new Circle(tmpX,tmpY,tmpR);
+                  }
+                }
+                else if(dist13>=dist12&&dist13>=dist23){
+                  tmpR=(dist13+r1+r3)/2;
+                  tmpX=(x1+(tmpR-r1)*(x3-x1)/dist13);
+                  tmpY=(y1+(tmpR-r1)*(y3-y1)/dist13);
+                  distSP=abs(dist(tmpX,tmpY,x2,y2));
+                  if(distSP<(tmpR-r2)){
+                    res=new Circle(tmpX,tmpY,tmpR);
+                  }
+                }
+                else{
+                  tmpR=(dist23+r2+r3)/2;
+                  tmpX=(x2+(tmpR-r2)*(x3-x2)/dist23);
+                  tmpY=(y2+(tmpR-r2)*(y3-y2)/dist23);
+                  distSP=abs(dist(tmpX,tmpY,x1,y1));
+                  if(distSP<(tmpR-r1)){
+                    res=new Circle(tmpX,tmpY,tmpR);
+                  }
+                }
+                
                 boolean allIn = true;
                 //See if all the discs are within this circle
                 for(int l = 0; l < currentDisks.n; l++)
                 {
                   float distance = abs(dist((float)res.getX(), (float)res.getY(), currentDisks.disks[l].x, currentDisks.disks[l].y)) + currentDisks.disks[l].r;
-                  if(distance > res.radius + 5)
+                  if(distance > res.radius+5)
                     allIn = false;
                 }
                 
