@@ -70,6 +70,8 @@ void draw(){
     fill(100, 100);
     ellipse((float)smallestPlayer2.getX(), (float)smallestPlayer2.getY(), (float)smallestPlayer2.radius * 2, (float)smallestPlayer2.radius * 2);
   }
+  
+  drawIntersections();
 }
 
 void mousePressed(){
@@ -227,6 +229,42 @@ void keyPressed()
     currentDisks = diskSet1;
     setup();
   }
+}
+
+//http://paulbourke.net/geometry/2circle/
+float[] getIntersection(Disk a, Disk b, float ext)
+{
+  float distance = sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+  float a_len = (pow(a.r + ext, 2) - pow(b.r + ext, 2) + pow(distance, 2)) / (2 * distance);
+  float h = sqrt(pow(a.r + ext, 2) - pow(a_len, 2));
+  
+  float CX = a.x + a_len * (b.x - a.x) / distance;
+  float CY = a.y + a_len * (b.y - a.y) / distance;
+  
+  float X1 = CX + h * (b.y - a.y) / distance;
+  float Y1 = CY - h * (b.x - a.x) / distance;
+  
+  float[] retn = new float[2];
+  retn[0] = X1;
+  retn[1] = Y1;
+  return retn;
+}
+
+void drawIntersections()
+{
+  for(int i = 0; i < currentDisks.n; i++)
+    for(int j = 0; j < currentDisks.n; j++)
+    {
+      if( i == j) continue;
+      Disk a = currentDisks.disks[i];
+      Disk b = currentDisks.disks[j];
+      float distance = sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+      if(distance < a.r + b.r + 1)
+      {
+        float[] arr = getIntersection(a, b, 5);
+        ellipse(arr[0], arr[1], 10, 10);
+      }
+    }
 }
 
 class Disk {
