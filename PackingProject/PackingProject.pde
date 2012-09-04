@@ -34,6 +34,7 @@ void setup(){
     }
     
   diskSet2 = diskSet1.clone();
+  diskSet1 = placeDisks(diskSet1);
   }
 
 
@@ -265,6 +266,74 @@ void drawIntersections()
         ellipse(arr[0], arr[1], 10, 10);
       }
     }
+}
+
+Disks placeDisks(Disks diskSet)
+{
+  Disks tmp = new Disks();
+  int[] tracker = new int[diskSet.n];
+  
+  //Order from largest to smallest
+  for(int i = 0; i < diskSet.n; i++)
+  {
+    Disk highest = diskSet.disks[0];
+    float curMax = 0f;
+    for(int j = 0; j < diskSet.n; j++)
+    {
+      if(diskSet.disks[j].r > curMax && tracker[j] != 1)
+      {
+        curMax = diskSet.disks[j].r;
+        highest = diskSet.disks[j];
+        tracker[j] = 1;
+      }
+    }
+    tmp.add_disk(highest.x, highest.y, highest.r, highest.colour);
+  }
+  
+  //place first two disks
+  tmp.disks[0].x = 200;
+  tmp.disks[0].y = 350;
+  tmp.disks[1].x = 200;
+  tmp.disks[1].y = 350 + tmp.disks[0].r + tmp.disks[1].r;
+  
+  ArrayList<D_Struct> openStructs = new ArrayList<D_Struct>();
+  Disks root = new Disks();
+  root.add_disk(tmp.disks[0].x, tmp.disks[0].y, tmp.disks[0].r, tmp.disks[0].colour);
+  root.add_disk(tmp.disks[1].x, tmp.disks[1].y, tmp.disks[1].r, tmp.disks[1].colour);
+  
+  D_Struct root_struct = new D_Struct();
+  root_struct.state = root;
+  root_struct.radius = root.disks[0].r + root.disks[1].r;
+  root_struct.level = 2;
+  
+  openStructs.add(root_struct);
+  
+  //Dijkstra iteration
+  while(!openStructs.isEmpty())
+  {
+    //Get the smallest queue'd radius
+    float smallest = 100000f;
+    int smallestIdx = 0;
+    for(int i = 0; i < openStructs.size(); i++)
+    {
+      if(smallest < openStructs.get(i).radius)
+      {
+        smallest = openStructs.get(i).radius;
+        smallestIdx = i;
+      }
+    }
+    D_Struct curr = openStructs.get(smallestIdx);
+    openStructs.remove(smallestIdx);
+  }
+  
+  return tmp;
+}
+
+class D_Struct
+{
+  Disks state;
+  int level = 0;
+  float radius = 0;
 }
 
 class Disk {
