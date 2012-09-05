@@ -34,10 +34,13 @@ void setup(){
     }
     
   diskSet2 = diskSet1.clone();
-  diskSet1 = placeDisks(diskSet1);
-  currentDisks = diskSet1;
-  smallestPlayer2 = null;
   }
+  
+void computeP2()
+{
+  diskSet2 = placeDisks(diskSet2);
+  currentDisks = diskSet2;
+}
 
 
 //Display Loop
@@ -236,6 +239,11 @@ void keyPressed()
     currentDisks = diskSet1;
     setup();
   }
+  else if(key == 'c' && drawPlayer2)
+  {
+    computeP2();
+    DrawMinimalBounds(null);
+  }
 }
 
 //http://paulbourke.net/geometry/2circle/
@@ -301,10 +309,10 @@ Disks placeDisks(Disks diskSet)
   }
   
   //place first two disks
-  tmp.disks[0].x = 200;
-  tmp.disks[0].y = 350;
-  tmp.disks[1].x = 200;
-  tmp.disks[1].y = 350 + tmp.disks[0].r + tmp.disks[1].r;
+  tmp.disks[0].x = width * .75;
+  tmp.disks[0].y = height / 2 - tmp.disks[0].r;
+  tmp.disks[1].x = width * .75;
+  tmp.disks[1].y = height / 2 + tmp.disks[1].r;
   
   ArrayList<D_Struct> openStructs = new ArrayList<D_Struct>();
   Disks root = new Disks();
@@ -334,7 +342,7 @@ Disks placeDisks(Disks diskSet)
     }
     D_Struct curr = openStructs.get(smallestIdx);
     openStructs.remove(smallestIdx);
-    println(curr.level + "(" + curr.radius + ")");
+    //println(curr.level + "(" + curr.radius + ")");
     
     //Place the next disk
     for(int i = 0; i < curr.state.n; i++)
@@ -343,6 +351,8 @@ Disks placeDisks(Disks diskSet)
       //println("ij: " + i + ", " + j);
       if(i == j) continue;
       Disk nextDisk = tmp.disks[curr.level];
+      
+      //skip if these disks aren't touching
       float distance = sqrt(pow(curr.state.disks[i].x - curr.state.disks[j].x, 2) + pow(curr.state.disks[i].y - curr.state.disks[j].y, 2));
       if(distance > curr.state.disks[i].r + curr.state.disks[j].r + 1) continue;
       float[] intr = getIntersection(curr.state.disks[i], curr.state.disks[j], nextDisk.r);
@@ -351,6 +361,7 @@ Disks placeDisks(Disks diskSet)
       
       //println("Testing: " + i + ", " + j);
       
+      //Ignore this placement if it collides with another disk
       if(!isColliding(nextDisk, curr.state))
       {
         D_Struct newLeaf = new D_Struct();
@@ -367,14 +378,14 @@ Disks placeDisks(Disks diskSet)
         {
           if(newLeaf.radius < bestSolution.radius)
           {
-            println("Solution?");
+            //println("Solution?");
             bestSolution.state = newLeaf.state.clone();
             bestSolution.radius = newLeaf.radius;
           }
         }
         else
         {
-          println("Adding L" + curr.level + " (" + newLeaf.radius + ")");
+          //println("Adding L" + curr.level + " (" + newLeaf.radius + ")");
           openStructs.add(newLeaf);
         }
         
