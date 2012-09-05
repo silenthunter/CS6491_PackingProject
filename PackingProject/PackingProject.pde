@@ -272,6 +272,8 @@ Disks placeDisks(Disks diskSet)
 {
   Disks tmp = new Disks();
   int[] tracker = new int[diskSet.n];
+  D_Struct bestSolution = new D_Struct();
+  bestSolution.radius = 1000000;
   
   //Order from largest to smallest
   for(int i = 0; i < diskSet.n; i++)
@@ -324,9 +326,64 @@ Disks placeDisks(Disks diskSet)
     }
     D_Struct curr = openStructs.get(smallestIdx);
     openStructs.remove(smallestIdx);
+    println(curr.level);
+    
+    //Place the next disk
+    for(int i = 0; i < curr.state.n; i++)
+    for(int j = 0; j < curr.state.n; j++)
+    {
+      if(i == j) continue;
+      Disk nextDisk = tmp.disks[curr.level];
+      float[] intr = getIntersection(curr.state.disks[i], curr.state.disks[j], nextDisk.r);
+      nextDisk.x = intr[0];
+      nextDisk.y = intr[1];
+      
+      if(!isColliding(nextDisk, curr.state))
+      {
+        println("Inside");
+        D_Struct newLeaf = new D_Struct();
+        newLeaf.state = curr.state.clone();
+        newLeaf.state.add_disk(nextDisk.x, nextDisk.y, nextDisk.r, nextDisk.colour);
+        
+        newLeaf.level = curr.level + 1;
+        DrawMinimalBounds();
+        newLeaf.radius = (float)smallestPlayer1.radius;
+        println("Test");
+        println(newLeaf.radius);
+//        newLeaf.radius = getRadius(newLeaf.state);
+
+        if(newLeaf.level == tmp.n)
+        {
+          if(newLeaf.radius < bestSolution.radius)
+          {
+            println("Solution?");
+            bestSolution.state = newLeaf.state.clone();
+            bestSolution.radius = newLeaf.radius;
+          }
+        }
+        else
+          openStructs.add(newLeaf);
+        
+      }
+    }
   }
   
-  return tmp;
+  return bestSolution.state;
+}
+
+boolean isColliding(Disk nextDisk, Disks current)
+{
+  for(int i = 0; i < current.n; i++)
+  {
+    float distance = sqrt(pow(nextDisk.x - current.disks[i].x, 2) + pow(nextDisk.y - current.disks[i].y, 2));
+    if(distance <= nextDisk.r + current.disks[i].r - 1)
+    {
+      //println("Distance: " + distance + ", Radius: " + (nextDisk.r + current.disks[i].r));
+      return true;
+    }
+  }
+  //println("OK!");
+  return false;
 }
 
 class D_Struct
