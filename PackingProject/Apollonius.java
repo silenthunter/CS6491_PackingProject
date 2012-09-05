@@ -896,7 +896,7 @@ public class Apollonius {
 			return rArr;
 		}
 		else {
-			System.out.println("Point is on either circle"); // TODO: Throw error
+			//System.out.println("Point is on either circle"); // TODO: Throw error
 			return new Shape[4];
 		}
 	}
