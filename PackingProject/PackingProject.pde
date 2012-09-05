@@ -6,7 +6,7 @@
 
 //Global Variables
 float centerX,centerY;
-int[] radiusSet={50,30,40,70,20};
+int[] radiusSet={50,30,40,70,20,20,10};
 int diskNum=5;
 Disks diskSet1= new Disks();
 Disks diskSet2;
@@ -35,6 +35,8 @@ void setup(){
     
   diskSet2 = diskSet1.clone();
   diskSet1 = placeDisks(diskSet1);
+  currentDisks = diskSet1;
+  smallestPlayer1 = null;
   }
 
 
@@ -72,7 +74,7 @@ void draw(){
     ellipse((float)smallestPlayer2.getX(), (float)smallestPlayer2.getY(), (float)smallestPlayer2.radius * 2, (float)smallestPlayer2.radius * 2);
   }
   
-  drawIntersections();
+  //drawIntersections();
 }
 
 void mousePressed(){
@@ -199,7 +201,7 @@ void DrawMinimalBounds()
                 for(int l = 0; l < currentDisks.n; l++)
                 {
                   float distance = abs(dist((float)res.getX(), (float)res.getY(), currentDisks.disks[l].x, currentDisks.disks[l].y)) + currentDisks.disks[l].r;
-                  if(distance > res.radius+5)
+                  if(distance > res.radius+1)
                     allIn = false;
                 }
                 
@@ -280,15 +282,17 @@ Disks placeDisks(Disks diskSet)
   {
     Disk highest = diskSet.disks[0];
     float curMax = 0f;
+    int idx = 0;
     for(int j = 0; j < diskSet.n; j++)
     {
       if(diskSet.disks[j].r > curMax && tracker[j] != 1)
       {
         curMax = diskSet.disks[j].r;
         highest = diskSet.disks[j];
-        tracker[j] = 1;
+        idx = j;
       }
     }
+    tracker[idx] = 1;
     tmp.add_disk(highest.x, highest.y, highest.r, highest.colour);
   }
   
@@ -318,7 +322,7 @@ Disks placeDisks(Disks diskSet)
     int smallestIdx = 0;
     for(int i = 0; i < openStructs.size(); i++)
     {
-      if(smallest < openStructs.get(i).radius)
+      if(smallest > openStructs.get(i).radius)
       {
         smallest = openStructs.get(i).radius;
         smallestIdx = i;
@@ -334,13 +338,14 @@ Disks placeDisks(Disks diskSet)
     {
       if(i == j) continue;
       Disk nextDisk = tmp.disks[curr.level];
+      float distance = sqrt(pow(curr.state.disks[i].x - curr.state.disks[j].x, 2) + pow(curr.state.disks[i].y - curr.state.disks[j].y, 2));
+      if(distance > curr.state.disks[i].r + curr.state.disks[i].r + 1) continue;
       float[] intr = getIntersection(curr.state.disks[i], curr.state.disks[j], nextDisk.r);
       nextDisk.x = intr[0];
       nextDisk.y = intr[1];
       
       if(!isColliding(nextDisk, curr.state))
       {
-        println("Inside");
         D_Struct newLeaf = new D_Struct();
         newLeaf.state = curr.state.clone();
         newLeaf.state.add_disk(nextDisk.x, nextDisk.y, nextDisk.r, nextDisk.colour);
@@ -348,11 +353,10 @@ Disks placeDisks(Disks diskSet)
         newLeaf.level = curr.level + 1;
         DrawMinimalBounds();
         newLeaf.radius = (float)smallestPlayer1.radius;
-        println("Test");
-        println(newLeaf.radius);
-//        newLeaf.radius = getRadius(newLeaf.state);
+        //println("Test");
+        //println(newLeaf.radius);
 
-        if(newLeaf.level == tmp.n)
+        if(newLeaf.level == tmp.n || newLeaf.radius > bestSolution.radius)
         {
           if(newLeaf.radius < bestSolution.radius)
           {
@@ -362,7 +366,10 @@ Disks placeDisks(Disks diskSet)
           }
         }
         else
+        {
+          println("Adding L" + curr.level);
           openStructs.add(newLeaf);
+        }
         
       }
     }
