@@ -6,7 +6,7 @@
 
 //Global Variables
 float centerX,centerY;
-int[] radiusSet={50,30,40,70,20,20,10};
+int[] radiusSet;//={50,30,40,70,20,20,10};
 int diskNum=5;
 Disks diskSet1= new Disks();
 Disks diskSet2;
@@ -19,6 +19,14 @@ boolean drawPlayer2 = false;
 
 //Intialization
 void setup(){
+  String lines[] = loadStrings("disks.txt");
+  diskNum = Integer.parseInt(lines[0]);
+  radiusSet = new int[diskNum];
+  for(int i = 0; i < diskNum; i++)
+  {
+    radiusSet[i] = Integer.parseInt(lines[i + 1]);
+  }
+  
   curDisk=-1;
   overIndex=-1;
   smallestPlayer1 = null;
